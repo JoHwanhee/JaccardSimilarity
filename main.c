@@ -21,15 +21,6 @@ int getLength(unsigned char* str) {
     return cnt;
 }
 
-int getLengthDoublePointer(unsigned char** str) {
-    int cnt = 1;
-    unsigned char** tmp = str;
-    for (int i = 0; tmp[i] != NULL; i++) {
-        cnt++;
-    }
-    return cnt;
-}
-
 int equals(unsigned char* str1, unsigned char* str2) {
     int size1 = getLength(str1);
     int size2 = getLength(str2);
@@ -94,23 +85,6 @@ unsigned char** multiset(unsigned char* str, int* ret_size) {
     *ret_size = (size);
     return arr;
 }
-
-unsigned char** whatLonggerArray(unsigned char** str1, unsigned char** str2, int* size) {
-    int size1 = getLengthDoublePointer(str1);
-    int size2 = getLengthDoublePointer(str2);
-
-    if (size1 > size2) {
-        *size = size1;
-        return str1;
-    }
-    if (size1 == size2) {
-        *size = size1;
-        return str1;
-    }
-    *size = size2;
-    return str2;
-}
-
 
 int countUnion() {
     Node* temp = head;
