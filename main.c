@@ -16,41 +16,35 @@ typedef struct dictionary {
     Item* tail;
 } Dictionary;
 
-int getLength(unsigned char* str) {
-    int cnt = 0;
-    unsigned char* tmp = str;
-    while (*tmp++)
-        cnt++;
-
-    return cnt;
-}
-
-int equals(unsigned char* str1, unsigned char* str2) {
-    int size1 = getLength(str1);
-    int size2 = getLength(str2);
-
-    if (size1 != size2) {
-        return FALSE;
-    }
-
-    for (int i = 0; i < size1; i++) {
-        if (str1[i] != str2[i]) {
-            return FALSE;
-        }
-    }
-
-    return TRUE;
-}
-
 Item* get(Dictionary *dictionary, unsigned char* key) {
     Item* temp = dictionary->head;
     for (; temp != NULL;  temp = temp->next) {
-        if (equals(temp->key, key)) {
+        if (strcmp(temp->key, key) == 0) {
             return temp;
         }
        
     }
     return NULL;
+}
+
+int exist(Dictionary *dictionary, unsigned char* key)
+{
+    Item* temp = dictionary->head;
+    while (temp != NULL)
+    {
+        if (strcmp(temp->key, key) == 0) {
+            return TRUE;
+        }
+        temp = temp->next;
+    }
+
+    return FALSE;
+}
+
+void addTail(Dictionary *dictionary, Item* item)
+{
+    dictionary->tail->next = item;
+    dictionary->tail = item;
 }
 
 void put(Dictionary *dictionary, Item* item) {
@@ -61,28 +55,15 @@ void put(Dictionary *dictionary, Item* item) {
     else
     {
         Item* existedItem = get(dictionary, item->key);
-        if (existedItem != NULL) {
+        if (existedItem) {
             existedItem->value = item->value;
             strcpy(existedItem->key, item->key);
             free(item);
             return;
         }
 
-        dictionary->tail->next = item;
-        dictionary->tail = item;
+        addTail(dictionary, item);
     }
-}
-
-int exist(Dictionary *dictionary, unsigned char* key)
-{
-    Item* temp = dictionary->head;
-    for (; temp != NULL;) {
-        if (equals(temp->key, key)) {
-            return TRUE;
-        }
-        temp = temp->next;
-    }
-    return FALSE;
 }
 
 Item* createItem(unsigned char* key, int value) {
@@ -144,7 +125,7 @@ void loads(Dictionary* dictionary, unsigned char** arr, int start, int end)
 }
 
 unsigned char** multiset(unsigned char* str, int* ret_size) {
-    int size = getLength(str);
+    int size = strlen(str);
 
     unsigned char** arr = malloc(sizeof(unsigned char**) * size);
 
@@ -161,13 +142,13 @@ unsigned char** multiset(unsigned char* str, int* ret_size) {
 }
 
 double jaccard(unsigned char* str1, unsigned char* str2) {
-    int size1 = 0;
-    int size2 = 0;
-    unsigned char** arr1 = multiset(str1, &size1);
-    unsigned char** arr2 = multiset(str2, &size2);
-    
     Dictionary* dictionary = createDicionary();
+    int size1 = 0;
+    unsigned char** arr1 = multiset(str1, &size1);
     loads(dictionary, arr1, 0, size1 - 1);
+    
+    int size2 = 0;
+    unsigned char** arr2 = multiset(str2, &size2);
     loads(dictionary, arr2, 0, size2 - 1);
 
     const double intersetCount = (double)count(dictionary, isInterset);
@@ -228,7 +209,7 @@ unsigned char* filter(unsigned char* str)
 }
 
 int main(int argc, char const *argv[]) {
-    unsigned char* a = "좋은 아침입니다.";
+    unsigned char* a = "hello ";
     unsigned char* b = "안녕하세요. 좋은 아침입니다. ";
     printf("A : %s\n", a);
     printf("B : %s\n", b);
