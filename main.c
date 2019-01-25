@@ -1,17 +1,19 @@
 #include <stdio.h>
 #include <stdlib.h>
+#include <string.h>
+
 #define TRUE 1
 #define FALSE 0
 
-typedef struct node {
+typedef struct item {
     unsigned char* key;
     int value;
-    struct node* next;
-} Node;
+    struct item* next;
+} Item;
 
 typedef struct dictionary {
-    Node* head;
-    Node* tail;
+    Item* head;
+    Item* tail;
 } Dictionary;
 
 int getLength(unsigned char* str) {
@@ -40,38 +42,53 @@ int equals(unsigned char* str1, unsigned char* str2) {
     return TRUE;
 }
 
-Node* search(Dictionary *dictionary, unsigned char* key) {
-    Node* temp = dictionary->head;
-    for (; temp != NULL;) {
+Item* get(Dictionary *dictionary, unsigned char* key) {
+    Item* temp = dictionary->head;
+    for (; temp != NULL;  temp = temp->next) {
         if (equals(temp->key, key)) {
             return temp;
         }
-        temp = temp->next;
+       
     }
     return NULL;
 }
 
-void put(Dictionary *dictionary,  Node* node) {
+void put(Dictionary *dictionary, Item* item) {
     if (dictionary->head == NULL) {
-        dictionary->head = node;
-        dictionary->tail = node;
-        return;
+        dictionary->head = item;
+        dictionary->tail = item;
     }
+    else
+    {
+        Item* existedItem = get(dictionary, item->key);
+        if (existedItem != NULL) {
+            existedItem->value = item->value;
+            strcpy(existedItem->key, item->key);
+            free(item);
+            return;
+        }
 
-    Node* existed = search(dictionary, node->key);
-    if (!existed) {
-        dictionary->tail->next = node;
-        dictionary->tail = node;
-    }
-    else {
-        existed->value = 1;
+        dictionary->tail->next = item;
+        dictionary->tail = item;
     }
 }
 
-Node* createNode(unsigned char* key) {
-    Node* newNode = malloc(sizeof(Node));
+int exist(Dictionary *dictionary, unsigned char* key)
+{
+    Item* temp = dictionary->head;
+    for (; temp != NULL;) {
+        if (equals(temp->key, key)) {
+            return TRUE;
+        }
+        temp = temp->next;
+    }
+    return FALSE;
+}
+
+Item* createItem(unsigned char* key, int value) {
+    Item* newNode = malloc(sizeof(Item));
     newNode->key = key;
-    newNode->value = 0;
+    newNode->value = value;
     newNode->next = NULL;
 
     return newNode;
@@ -85,25 +102,8 @@ Dictionary* createDicionary() {
     return dictionary;
 }
 
-unsigned char** multiset(unsigned char* str, int* ret_size) {
-    int size = getLength(str);
-
-    unsigned char** arr = malloc(sizeof(unsigned char**) * size);
-
-    for (int i = 0; i < size - 1; i++)
-    {
-        arr[i] = malloc(sizeof(unsigned char*) * 3);
-        sprintf(arr[i], "%x%x%c", str[i], str[i + 1], '\0');
-    }
-
-    arr[size - 1] = NULL;
-
-    *ret_size = (size);
-    return arr;
-}
-
 int count(Dictionary *dictionary, int (*method)(int)) {
-    Node* temp = dictionary->head;
+    Item* temp = dictionary->head;
     int i = 0;
     for (; temp != NULL; temp = temp->next) {
         if(method(temp->value))
@@ -124,12 +124,40 @@ int isUinon(int value)
     return TRUE;
 }
 
-void loadsDictionary(Dictionary* dictionary, unsigned char** arr, int size)
+void loads(Dictionary* dictionary, unsigned char** arr, int start, int end)
 {
-    for (int i = 0; i < size; i++) {
-        Node* newNode = createNode(arr[i]);
-        put(dictionary, newNode);
+    for (int i = start; i < end; i++) {
+        unsigned char* key = arr[i];
+        int value = 0;
+
+        if(exist(dictionary, key))
+        {
+            value = 1;
+        }
+        else
+        {
+            value = 0;
+        }
+        
+        put(dictionary, createItem(key, value));
     }
+}
+
+unsigned char** multiset(unsigned char* str, int* ret_size) {
+    int size = getLength(str);
+
+    unsigned char** arr = malloc(sizeof(unsigned char**) * size);
+
+    for (int i = 0; i < size - 1; i++)
+    {
+        arr[i] = malloc(sizeof(unsigned char*) * 3);
+        sprintf(arr[i], "%x%x%c", str[i], str[i + 1], '\0');
+    }
+
+    arr[size - 1] = NULL;
+
+    *ret_size = (size);
+    return arr;
 }
 
 double jaccard(unsigned char* str1, unsigned char* str2) {
@@ -139,8 +167,8 @@ double jaccard(unsigned char* str1, unsigned char* str2) {
     unsigned char** arr2 = multiset(str2, &size2);
     
     Dictionary* dictionary = createDicionary();
-    loadsDictionary(dictionary, arr1, size1 - 1);
-    loadsDictionary(dictionary, arr2, size2 - 1);
+    loads(dictionary, arr1, 0, size1 - 1);
+    loads(dictionary, arr2, 0, size2 - 1);
 
     const double intersetCount = (double)count(dictionary, isInterset);
     const double unionCount = (double)count(dictionary, isUinon);
