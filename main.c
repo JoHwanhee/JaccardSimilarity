@@ -102,26 +102,27 @@ unsigned char** multiset(unsigned char* str, int* ret_size) {
     return arr;
 }
 
-int countUnion(Dictionary *dictionary) {
+int count(Dictionary *dictionary, int (*method)(int)) {
     Node* temp = dictionary->head;
     int i = 0;
     for (; temp != NULL; temp = temp->next) {
-        i++;
-    }
-    return i;
-}
-
-int countInter(Dictionary *dictionary) {
-    Node* temp = dictionary->head;
-    int i = 0;
-    for (; temp != NULL; temp = temp->next) {
-        if (temp->value == 1) {
+        if(method(temp->value))
+        {
             i++;
         }
     }
     return i;
 }
 
+int isInterset(int value)
+{
+    return value == 1;
+}
+
+int isUinon(int value)
+{
+    return TRUE;
+}
 
 void loadsDictionary(Dictionary* dictionary, unsigned char** arr, int size)
 {
@@ -140,8 +141,11 @@ double jaccard(unsigned char* str1, unsigned char* str2) {
     Dictionary* dictionary = createDicionary();
     loadsDictionary(dictionary, arr1, size1 - 1);
     loadsDictionary(dictionary, arr2, size2 - 1);
-    
-    return (double)countInter(dictionary) / (double)countUnion(dictionary);
+
+    const double intersetCount = (double)count(dictionary, isInterset);
+    const double unionCount = (double)count(dictionary, isUinon);
+
+    return intersetCount / unionCount;
 }
 
 
@@ -196,8 +200,8 @@ unsigned char* filter(unsigned char* str)
 }
 
 int main(int argc, char const *argv[]) {
-    unsigned char* a = "안녕하세요. 좋은 아침입니다.";
-    unsigned char* b = "좋은 아침입니다. ";
+    unsigned char* a = "좋은 아침입니다.";
+    unsigned char* b = "안녕하세요. 좋은 아침입니다. ";
     printf("A : %s\n", a);
     printf("B : %s\n", b);
 
