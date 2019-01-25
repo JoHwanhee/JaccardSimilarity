@@ -21,7 +21,7 @@ int getLength(unsigned char* str) {
     return cnt;
 }
 
-int getLengthDouble(unsigned char** str) {
+int getLengthDoublePointer(unsigned char** str) {
     int cnt = 1;
     unsigned char** tmp = str;
     for (int i = 0; tmp[i] != NULL; i++) {
@@ -96,8 +96,8 @@ unsigned char** multiset(unsigned char* str, int* ret_size) {
 }
 
 unsigned char** whatLonggerArray(unsigned char** str1, unsigned char** str2, int* size) {
-    int size1 = getLengthDouble(str1);
-    int size2 = getLengthDouble(str2);
+    int size1 = getLengthDoublePointer(str1);
+    int size2 = getLengthDoublePointer(str2);
 
     if (size1 > size2) {
         *size = size1;
@@ -155,7 +155,7 @@ double jaccard(unsigned char* str1, unsigned char* str2) {
     return (double)countInter() / (double)countUnion();
 }
 
-unsigned int isInvaildChar(unsigned char ch)
+unsigned int validateChar(unsigned char ch)
 {
     switch (ch)
     {
@@ -182,7 +182,7 @@ unsigned char* filter(unsigned char* str)
     int count = 1;
     while(*temp)
     {
-        if (isInvaildChar(*temp))
+        if (validateChar(*temp))
             count++;
 
         temp++;
@@ -195,7 +195,7 @@ unsigned char* filter(unsigned char* str)
     int i = 0;
     while (*temp)
     {
-        if (isInvaildChar(*temp))
+        if (validateChar(*temp))
             newStr[i++] = *temp;
 
         temp++;
