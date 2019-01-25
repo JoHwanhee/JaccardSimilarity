@@ -51,7 +51,7 @@ Node* search(Dictionary *dictionary, unsigned char* key) {
     return NULL;
 }
 
-void append(Dictionary *dictionary,  Node* node) {
+void put(Dictionary *dictionary,  Node* node) {
     if (dictionary->head == NULL) {
         dictionary->head = node;
         dictionary->tail = node;
@@ -127,7 +127,7 @@ void loadsDictionary(Dictionary* dictionary, unsigned char** arr, int size)
 {
     for (int i = 0; i < size; i++) {
         Node* newNode = createNode(arr[i]);
-        append(dictionary, newNode);
+        put(dictionary, newNode);
     }
 }
 
