@@ -9,8 +9,10 @@ typedef struct node {
     struct node* next;
 } Node;
 
-Node* head;
-Node* tail;
+typedef struct dictionary {
+    Node* head;
+    Node* tail;
+} Dictionary;
 
 int getLength(unsigned char* str) {
     int cnt = 0;
@@ -38,8 +40,8 @@ int equals(unsigned char* str1, unsigned char* str2) {
     return TRUE;
 }
 
-Node* search(unsigned char* key) {
-    Node* temp = head;
+Node* search(Dictionary *dictionary, unsigned char* key) {
+    Node* temp = dictionary->head;
     for (; temp != NULL;) {
         if (equals(temp->key, key)) {
             return temp;
@@ -49,14 +51,19 @@ Node* search(unsigned char* key) {
     return NULL;
 }
 
-void append(Node* node) {
-    Node* existed = search(node->key);
+void append(Dictionary *dictionary,  Node* node) {
+    if (dictionary->head == NULL) {
+        dictionary->head = node;
+        dictionary->tail = node;
+        return;
+    }
+
+    Node* existed = search(dictionary, node->key);
     if (!existed) {
-        tail->next = node;
-        tail = node;
+        dictionary->tail->next = node;
+        dictionary->tail = node;
     }
     else {
-
         existed->value = 1;
     }
 }
@@ -64,9 +71,18 @@ void append(Node* node) {
 Node* createNode(unsigned char* key) {
     Node* newNode = malloc(sizeof(Node));
     newNode->key = key;
+    newNode->value = 0;
     newNode->next = NULL;
 
     return newNode;
+}
+
+Dictionary* createDicionary() {
+    Dictionary* dictionary = malloc(sizeof(Dictionary));
+    dictionary->head = NULL;
+    dictionary->tail = NULL;
+
+    return dictionary;
 }
 
 unsigned char** multiset(unsigned char* str, int* ret_size) {
@@ -86,8 +102,8 @@ unsigned char** multiset(unsigned char* str, int* ret_size) {
     return arr;
 }
 
-int countUnion() {
-    Node* temp = head;
+int countUnion(Dictionary *dictionary) {
+    Node* temp = dictionary->head;
     int i = 0;
     for (; temp != NULL; temp = temp->next) {
         i++;
@@ -95,8 +111,8 @@ int countUnion() {
     return i;
 }
 
-int countInter() {
-    Node* temp = head;
+int countInter(Dictionary *dictionary) {
+    Node* temp = dictionary->head;
     int i = 0;
     for (; temp != NULL; temp = temp->next) {
         if (temp->value == 1) {
@@ -106,28 +122,28 @@ int countInter() {
     return i;
 }
 
+
+void loadsDictionary(Dictionary* dictionary, unsigned char** arr, int size)
+{
+    for (int i = 0; i < size; i++) {
+        Node* newNode = createNode(arr[i]);
+        append(dictionary, newNode);
+    }
+}
+
 double jaccard(unsigned char* str1, unsigned char* str2) {
     int size1 = 0;
     int size2 = 0;
     unsigned char** arr1 = multiset(str1, &size1);
     unsigned char** arr2 = multiset(str2, &size2);
-
-    for (int i = 0; i < size1 - 1; i++) {
-        Node* newNode = createNode(arr1[i]);
-        if (head == NULL) {
-            head = newNode;
-            tail = newNode;
-            continue;
-        }
-        append(newNode);
-    }
-
-    for (int i = 0; i < size2 - 1; i++) {
-        Node* newNode = createNode(arr2[i]);
-        append(newNode);
-    }
-    return (double)countInter() / (double)countUnion();
+    
+    Dictionary* dictionary = createDicionary();
+    loadsDictionary(dictionary, arr1, size1 - 1);
+    loadsDictionary(dictionary, arr2, size2 - 1);
+    
+    return (double)countInter(dictionary) / (double)countUnion(dictionary);
 }
+
 
 unsigned int validateChar(unsigned char ch)
 {
@@ -149,6 +165,7 @@ unsigned int validateChar(unsigned char ch)
         return TRUE;
     }
 }
+
 unsigned char* filter(unsigned char* str)
 {
     unsigned char* temp = str;
@@ -180,7 +197,7 @@ unsigned char* filter(unsigned char* str)
 
 int main(int argc, char const *argv[]) {
     unsigned char* a = "안녕하세요. 좋은 아침입니다.";
-    unsigned char* b = "안녕하세요. 좋은 아침입니다. ";
+    unsigned char* b = "좋은 아침입니다. ";
     printf("A : %s\n", a);
     printf("B : %s\n", b);
 
