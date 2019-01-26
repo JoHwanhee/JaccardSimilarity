@@ -46,7 +46,6 @@ void put(Dictionary *dictionary, Item* item) {
         if (existedItem) {
             existedItem->value = item->value;
             strcpy(existedItem->key, item->key);
-            free(item);
             return;
         }
 
